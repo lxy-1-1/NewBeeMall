@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.NewBeeMall" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#FF1ABC9C</item>
+        <item name="colorPrimaryVariant">#FF16A085</item>
+        <item name="colorOnPrimary">#FFFFFFFF</item>
+        <item name="colorSecondary">#FFFF6F61</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">#FFFFFFFF</item>
+    </style>
+</resources>

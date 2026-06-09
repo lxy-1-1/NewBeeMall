@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnOrderAll"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="全部" />
+
+            <Button
+                android:id="@+id/btnOrderWaitPay"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="待付款" />
+
+            <Button
+                android:id="@+id/btnOrderWaitConfirm"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="待确认" />
+
+            <Button
+                android:id="@+id/btnOrderWaitSend"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="待发货" />
+
+            <Button
+                android:id="@+id/btnOrderSent"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="已发货" />
+
+            <Button
+                android:id="@+id/btnOrderDone"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="交易完成" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <ListView
+        android:id="@+id/lvOrders"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
