@@ -21,6 +21,7 @@
         android:layout_height="50dp"
         android:hint="请输入手机号"
         android:inputType="phone"
+        android:maxLength="11"
         android:text="16666666666" />
 
     <EditText
@@ -37,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginTop="30dp"
-        android:background="@color/primary"
+        android:backgroundTint="@color/primary"
         android:text="登录"
         android:textColor="@color/white" />
 
@@ -46,8 +47,8 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginTop="12dp"
-        android:background="@color/white"
+        android:backgroundTint="@color/primary"
         android:text="注册"
-        android:textColor="@color/primary" />
+        android:textColor="@color/white" />
 
 </LinearLayout>

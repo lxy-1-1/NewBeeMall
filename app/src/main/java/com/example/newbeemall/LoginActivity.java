@@ -48,6 +48,10 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "请输入手机号和密码", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (phone.length() != 11) {
+            Toast.makeText(this, "手机号必须是11位", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         new Thread(() -> {
             try {
@@ -103,6 +107,10 @@ public class LoginActivity extends AppCompatActivity {
 
         if (phone.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "请输入手机号和密码", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (phone.length() != 11) {
+            Toast.makeText(this, "手机号必须是11位", Toast.LENGTH_SHORT).show();
             return;
         }
 
