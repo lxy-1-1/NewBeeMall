@@ -2,7 +2,6 @@ package com.example.newbeemall;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -13,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.newbeemall.adapter.GoodsGridAdapter;
 import com.example.newbeemall.model.Goods;
 import com.example.newbeemall.util.HttpUtil;
+import com.example.newbeemall.util.JsonUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -91,6 +91,10 @@ public class SearchActivity extends AppCompatActivity {
             String result = HttpUtil.get(finalPath, this);
             runOnUiThread(() -> {
                 if (result != null) {
+                    if (!JsonUtil.isSuccess(result)) {
+                        Toast.makeText(this, JsonUtil.message(result), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     parseResult(result);
                 } else {
                     Toast.makeText(this, "搜索失败，请检查网络", Toast.LENGTH_SHORT).show();
@@ -128,9 +132,10 @@ public class SearchActivity extends AppCompatActivity {
                 goodsList.add(goods);
             }
             adapter.notifyDataSetChanged();
-            Toast.makeText(this, "找到 " + goodsList.size() + " 条结果", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, goodsList.isEmpty() ? "没有找到相关商品" : "找到 " + goodsList.size() + " 条结果", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Log.e(TAG, "Parse error", e);
+            Toast.makeText(this, "搜索结果解析失败", Toast.LENGTH_SHORT).show();
         }
     }
 }

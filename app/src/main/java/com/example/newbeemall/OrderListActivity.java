@@ -62,6 +62,10 @@ public class OrderListActivity extends AppCompatActivity {
                     return;
                 }
                 try {
+                    if (!JsonUtil.isSuccess(result)) {
+                        Toast.makeText(this, JsonUtil.message(result), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     orders.clear();
                     orders.addAll(JsonUtil.parseOrders(result));
                     adapter.notifyDataSetChanged();

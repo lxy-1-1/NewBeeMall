@@ -21,6 +21,24 @@ public class JsonUtil {
         return root.optJSONObject("data");
     }
 
+    public static boolean isSuccess(String json) {
+        try {
+            JSONObject root = new JSONObject(json);
+            return root.optInt("resultCode") == 200;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static String message(String json) {
+        try {
+            JSONObject root = new JSONObject(json);
+            return root.optString("message", "请求失败");
+        } catch (Exception e) {
+            return "请求失败";
+        }
+    }
+
     public static JSONArray dataArray(String json) throws Exception {
         JSONObject root = new JSONObject(json);
         JSONArray array = root.optJSONArray("data");

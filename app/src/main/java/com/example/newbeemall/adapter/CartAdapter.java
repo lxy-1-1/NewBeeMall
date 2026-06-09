@@ -61,7 +61,11 @@ public class CartAdapter extends BaseAdapter {
         String imgUrl = item.getGoodsCoverImg();
         if (imgUrl != null && !imgUrl.isEmpty()) {
             if (!imgUrl.startsWith("http")) imgUrl = HttpUtil.BASE_URL + imgUrl;
-            Glide.with(context).load(imgUrl).into(holder.cover);
+            Glide.with(context)
+                    .load(imgUrl)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .into(holder.cover);
         }
         return convertView;
     }

@@ -2,7 +2,6 @@ package com.example.newbeemall;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -10,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.newbeemall.util.HttpUtil;
+import com.example.newbeemall.util.JsonUtil;
 
 import org.json.JSONObject;
 
@@ -64,7 +64,11 @@ public class LoginActivity extends AppCompatActivity {
                     if (result != null) {
                         try {
                             JSONObject json = new JSONObject(result);
-                            String token = json.getString("data");
+                            if (json.optInt("resultCode") != 200) {
+                                Toast.makeText(this, json.optString("message", "登录失败"), Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            String token = json.optString("data");
                             if (token != null && !token.isEmpty()) {
                                 // 保存 token
                                 HttpUtil.saveToken(this, token);
@@ -104,19 +108,17 @@ public class LoginActivity extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                String md5Password = MD5Util.md5(password);
-
                 JSONObject body = new JSONObject();
                 body.put("loginName", phone);
-                body.put("passwordMd5", md5Password);
+                body.put("password", password);
 
                 String result = HttpUtil.post("/api/v1/user/register", body.toString(), this);
 
                 runOnUiThread(() -> {
-                    if (result != null) {
+                    if (result != null && JsonUtil.isSuccess(result)) {
                         Toast.makeText(this, "注册成功，请登录", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "注册失败，请检查网络", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, result == null ? "注册失败，请检查网络" : JsonUtil.message(result), Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {

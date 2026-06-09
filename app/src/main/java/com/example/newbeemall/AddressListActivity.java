@@ -64,6 +64,10 @@ public class AddressListActivity extends AppCompatActivity {
                     return;
                 }
                 try {
+                    if (!JsonUtil.isSuccess(result)) {
+                        Toast.makeText(this, JsonUtil.message(result), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     addresses.clear();
                     addresses.addAll(JsonUtil.parseAddresses(result));
                     adapter.notifyDataSetChanged();

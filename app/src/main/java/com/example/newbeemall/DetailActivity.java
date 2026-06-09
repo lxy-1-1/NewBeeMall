@@ -14,7 +14,6 @@ import com.example.newbeemall.model.Goods;
 import com.example.newbeemall.util.HttpUtil;
 import com.example.newbeemall.util.JsonUtil;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -57,6 +56,10 @@ public class DetailActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (result != null) {
                     try {
+                        if (!JsonUtil.isSuccess(result)) {
+                            Toast.makeText(this, JsonUtil.message(result), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         JSONObject data = JsonUtil.dataObject(result);
                         Goods goods = JsonUtil.parseGoods(data);
 
@@ -68,7 +71,11 @@ public class DetailActivity extends AppCompatActivity {
                         String img = goods.getGoodsCoverImg();
                         if (img != null && !img.isEmpty()) {
                             String imgUrl = img.startsWith("http") ? img : HttpUtil.BASE_URL + img;
-                            Glide.with(this).load(imgUrl).into(ivCover);
+                            Glide.with(this)
+                                    .load(imgUrl)
+                                    .placeholder(R.mipmap.ic_launcher)
+                                    .error(R.mipmap.ic_launcher)
+                                    .into(ivCover);
                         }
                     } catch (Exception e) {
                         Toast.makeText(this, "解析数据失败", Toast.LENGTH_SHORT).show();
@@ -92,6 +99,10 @@ public class DetailActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (result == null) {
                         Toast.makeText(this, "加入购物车失败", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!JsonUtil.isSuccess(result)) {
+                        Toast.makeText(this, JsonUtil.message(result), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Toast.makeText(this, "已加入购物车", Toast.LENGTH_SHORT).show();

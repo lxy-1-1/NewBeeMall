@@ -24,6 +24,17 @@
                 android:background="@color/light_gray" />
 
             <TextView
+                android:id="@+id/tvBannerTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="新蜂商城"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:background="@color/primary" />
+
+            <TextView
                 android:id="@+id/tvSearch"
                 android:layout_width="match_parent"
                 android:layout_height="42dp"

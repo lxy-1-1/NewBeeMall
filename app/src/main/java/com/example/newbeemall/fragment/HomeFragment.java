@@ -44,6 +44,7 @@ public class HomeFragment extends Fragment {
     private GoodsGridAdapter hotAdapter;
     private GoodsGridAdapter recommendAdapter;
     private ImageView ivBanner;
+    private TextView tvBannerTitle;
 
     @Nullable
     @Override
@@ -57,6 +58,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ivBanner = view.findViewById(R.id.ivBanner);
+        tvBannerTitle = view.findViewById(R.id.tvBannerTitle);
         TextView tvSearch = view.findViewById(R.id.tvSearch);
         GridView gvNav = view.findViewById(R.id.gvNav);
         GridView gvNewGoods = view.findViewById(R.id.gvNewGoods);
@@ -116,12 +118,16 @@ public class HomeFragment extends Fragment {
             String result = HttpUtil.get("/api/v1/index-infos", requireContext());
             if (getActivity() == null) return;
             getActivity().runOnUiThread(() -> {
-                if (result == null) {
-                    Toast.makeText(requireContext(), "首页数据加载失败", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                parseHomeData(result);
-            });
+            if (result == null) {
+                Toast.makeText(requireContext(), "首页数据加载失败", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!JsonUtil.isSuccess(result)) {
+                Toast.makeText(requireContext(), JsonUtil.message(result), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            parseHomeData(result);
+        });
         }).start();
     }
 
@@ -129,10 +135,10 @@ public class HomeFragment extends Fragment {
         try {
             JSONObject data = JsonUtil.dataObject(json);
             if (data == null) return;
-            loadBanner(data.optJSONArray("carousels"));
             replaceGoods(newGoods, data.optJSONArray("newGoodses"), newAdapter);
             replaceGoods(hotGoods, data.optJSONArray("hotGoodses"), hotAdapter);
             replaceGoods(recommendGoods, data.optJSONArray("recommendGoodses"), recommendAdapter);
+            loadBanner(data.optJSONArray("carousels"));
         } catch (Exception e) {
             Toast.makeText(requireContext(), "首页数据解析失败", Toast.LENGTH_SHORT).show();
         }
@@ -149,8 +155,16 @@ public class HomeFragment extends Fragment {
         JSONObject first = carousels.optJSONObject(0);
         if (first == null) return;
         String img = first.optString("carouselUrl", first.optString("goodsCoverImg"));
+        if ((img == null || img.isEmpty()) && !newGoods.isEmpty()) {
+            img = newGoods.get(0).getGoodsCoverImg();
+        }
         if (img == null || img.isEmpty()) return;
         String imgUrl = img.startsWith("http") ? img : HttpUtil.BASE_URL + img;
-        Glide.with(this).load(imgUrl).into(ivBanner);
+        Glide.with(this)
+                .load(imgUrl)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .into(ivBanner);
+        tvBannerTitle.setBackgroundColor(0x00000000);
     }
 }

@@ -78,9 +78,16 @@ public class CartFragment extends Fragment {
             getActivity().runOnUiThread(() -> {
                 if (result == null) {
                     Toast.makeText(requireContext(), "购物车加载失败", Toast.LENGTH_SHORT).show();
+                    tvCartSummary.setText("购物车加载失败");
                     return;
                 }
                 try {
+                    if (!JsonUtil.isSuccess(result)) {
+                        cartItems.clear();
+                        adapter.notifyDataSetChanged();
+                        tvCartSummary.setText(JsonUtil.message(result));
+                        return;
+                    }
                     cartItems.clear();
                     cartItems.addAll(JsonUtil.parseCartItems(result));
                     adapter.notifyDataSetChanged();
@@ -99,7 +106,11 @@ public class CartFragment extends Fragment {
             total += item.getTotalPrice();
             count += item.getGoodsCount();
         }
-        tvCartSummary.setText("共 " + count + " 件，合计 ¥" + total);
+        if (cartItems.isEmpty()) {
+            tvCartSummary.setText("购物车为空，先去商品详情加入商品");
+        } else {
+            tvCartSummary.setText("共 " + count + " 件，合计 ¥" + total);
+        }
     }
 
     private void checkout() {
@@ -125,7 +136,7 @@ public class CartFragment extends Fragment {
             String result = HttpUtil.delete("/api/v1/shop-cart/" + cartItemId, requireContext());
             if (getActivity() == null) return;
             getActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), result == null ? "删除失败" : "已删除", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), result == null || !JsonUtil.isSuccess(result) ? "删除失败" : "已删除", Toast.LENGTH_SHORT).show();
                 loadCart();
             });
         }).start();

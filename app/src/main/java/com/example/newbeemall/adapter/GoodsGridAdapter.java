@@ -71,7 +71,11 @@ public class GoodsGridAdapter extends BaseAdapter {
             if (!imgUrl.startsWith("http")) {
                 imgUrl = HttpUtil.BASE_URL + imgUrl;
             }
-            Glide.with(context).load(imgUrl).into(holder.ivCover);
+            Glide.with(context)
+                    .load(imgUrl)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .into(holder.ivCover);
         }
 
         // 点击跳转详情

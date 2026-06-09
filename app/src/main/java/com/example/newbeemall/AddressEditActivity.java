@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.newbeemall.util.HttpUtil;
+import com.example.newbeemall.util.JsonUtil;
 
 import org.json.JSONObject;
 
@@ -76,8 +77,8 @@ public class AddressEditActivity extends AppCompatActivity {
                         ? HttpUtil.put("/api/v1/address", body.toString(), this)
                         : HttpUtil.post("/api/v1/address", body.toString(), this);
                 runOnUiThread(() -> {
-                    if (result == null) {
-                        Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+                    if (result == null || !JsonUtil.isSuccess(result)) {
+                        Toast.makeText(this, result == null ? "保存失败" : JsonUtil.message(result), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
                         finish();

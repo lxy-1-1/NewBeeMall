@@ -55,9 +55,9 @@ public class CheckoutActivity extends AppCompatActivity {
         new Thread(() -> {
             String result = HttpUtil.get("/api/v1/address/default", this);
             runOnUiThread(() -> {
-                if (result == null) {
+                if (result == null || !JsonUtil.isSuccess(result)) {
                     defaultAddress = null;
-                    tvCheckoutAddress.setText("暂无默认地址，请先添加或选择地址");
+                    tvCheckoutAddress.setText(result == null ? "暂无默认地址，请先添加或选择地址" : JsonUtil.message(result));
                     return;
                 }
                 try {
@@ -80,6 +80,10 @@ public class CheckoutActivity extends AppCompatActivity {
                     return;
                 }
                 try {
+                    if (!JsonUtil.isSuccess(result)) {
+                        tvCheckoutGoods.setText(JsonUtil.message(result));
+                        return;
+                    }
                     List<CartItem> items = JsonUtil.parseCartItems(result);
                     double total = 0;
                     StringBuilder goodsText = new StringBuilder();
@@ -123,6 +127,10 @@ public class CheckoutActivity extends AppCompatActivity {
     private void handleOrderResult(String result) {
         if (result == null) {
             Toast.makeText(this, "生成订单失败", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!JsonUtil.isSuccess(result)) {
+            Toast.makeText(this, JsonUtil.message(result), Toast.LENGTH_SHORT).show();
             return;
         }
         String orderNo = "";
