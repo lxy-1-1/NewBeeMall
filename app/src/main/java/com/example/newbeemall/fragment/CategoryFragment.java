@@ -6,31 +6,36 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.newbeemall.R;
 import com.example.newbeemall.SearchActivity;
+import com.example.newbeemall.adapter.CategoryTagAdapter;
 import com.example.newbeemall.model.CategoryItem;
 import com.example.newbeemall.util.HttpUtil;
 import com.example.newbeemall.util.JsonUtil;
+import com.example.newbeemall.widget.ExpandedGridView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 分类页 - 左侧分类列表，右侧子分类入口
+ * 分类页 - 左侧分类列表（选中高亮），右侧子分类入口
  */
 public class CategoryFragment extends Fragment {
     private final List<CategoryItem> categories = new ArrayList<>();
     private final List<CategoryItem> currentChildren = new ArrayList<>();
-    private ArrayAdapter<CategoryItem> categoryAdapter;
-    private ArrayAdapter<CategoryItem> childAdapter;
+    private ListView lvCategory;
+    private int selectedPosition = 0;
+    private CategoryTagAdapter childAdapter;
+    private TextView tvSelectedCategoryTitle;
 
     @Nullable
     @Override
@@ -43,14 +48,41 @@ public class CategoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ListView lvCategory = view.findViewById(R.id.lvCategory);
-        GridView gvCategoryGoods = view.findViewById(R.id.gvCategoryGoods);
-        categoryAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_activated_1, categories);
-        childAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, currentChildren);
+        lvCategory = view.findViewById(R.id.lvCategory);
+        ExpandedGridView gvCategoryGoods = view.findViewById(R.id.gvCategoryGoods);
+        tvSelectedCategoryTitle = view.findViewById(R.id.tvSelectedCategoryTitle);
+        TextView tvCategorySearch = view.findViewById(R.id.tvCategorySearch);
+        tvCategorySearch.setOnClickListener(v -> startActivity(new Intent(requireContext(), SearchActivity.class)));
+
+        // 自定义适配器，带选中高亮
+        ArrayAdapter<CategoryItem> categoryAdapter = new ArrayAdapter<CategoryItem>(requireContext(),
+                R.layout.item_category_left, R.id.tvCategoryName, categories) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                TextView tv = v.findViewById(R.id.tvCategoryName);
+                if (position == selectedPosition) {
+                    tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary));
+                    tv.getPaint().setFakeBoldText(true);
+                } else {
+                    tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+                    tv.getPaint().setFakeBoldText(false);
+                }
+                return v;
+            }
+        };
+
+        lvCategory.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lvCategory.setAdapter(categoryAdapter);
+        childAdapter = new CategoryTagAdapter(requireContext(), currentChildren);
         gvCategoryGoods.setAdapter(childAdapter);
 
-        lvCategory.setOnItemClickListener((parent, itemView, position, id) -> selectCategory(position));
+        lvCategory.setOnItemClickListener((parent, itemView, position, id) -> {
+            selectedPosition = position;
+            categoryAdapter.notifyDataSetChanged();
+            selectCategory(position);
+        });
         gvCategoryGoods.setOnItemClickListener((parent, itemView, position, id) -> openCategorySearch(currentChildren.get(position)));
         loadCategories();
     }
@@ -67,8 +99,12 @@ public class CategoryFragment extends Fragment {
                 try {
                     categories.clear();
                     categories.addAll(JsonUtil.parseCategories(result));
-                    categoryAdapter.notifyDataSetChanged();
-                    if (!categories.isEmpty()) selectCategory(0);
+                    ((ArrayAdapter) lvCategory.getAdapter()).notifyDataSetChanged();
+                    if (!categories.isEmpty()) {
+                        selectedPosition = 0;
+                        selectCategory(0);
+                        ((ArrayAdapter) lvCategory.getAdapter()).notifyDataSetChanged();
+                    }
                 } catch (Exception e) {
                     Toast.makeText(requireContext(), "分类解析失败", Toast.LENGTH_SHORT).show();
                 }
@@ -85,6 +121,7 @@ public class CategoryFragment extends Fragment {
         } else {
             currentChildren.addAll(selected.getChildren());
         }
+        tvSelectedCategoryTitle.setText(selected.getName());
         childAdapter.notifyDataSetChanged();
     }
 

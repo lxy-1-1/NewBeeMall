@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.newbeemall.R;
@@ -44,13 +45,15 @@ public class AddressAdapter extends BaseAdapter {
             holder = new Holder();
             holder.name = convertView.findViewById(R.id.tvAddressName);
             holder.address = convertView.findViewById(R.id.tvAddressDetail);
+            holder.defaultTag = convertView.findViewById(R.id.tvDefaultTag);
+            holder.edit = convertView.findViewById(R.id.ivEdit);
             convertView.setTag(holder);
         } else {
             holder = (Holder) convertView.getTag();
         }
         Address item = addresses.get(position);
         String label = item.getUserName() + "  " + item.getUserPhone();
-        if (item.getDefaultFlag() == 1) label += "  默认";
+        holder.defaultTag.setVisibility(item.getDefaultFlag() == 1 ? View.VISIBLE : View.GONE);
         holder.name.setText(label);
         holder.address.setText(item.getFullAddress());
         return convertView;
@@ -59,5 +62,7 @@ public class AddressAdapter extends BaseAdapter {
     static class Holder {
         TextView name;
         TextView address;
+        TextView defaultTag;
+        ImageView edit;
     }
 }

@@ -2,28 +2,54 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/light_gray">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:gravity="center"
-        android:text="地址管理"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:tint="@color/black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="地址管理"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_more"
+            android:tint="@color/black" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/lvAddress"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="10dp"
+        android:padding="12dp"
+        android:clipToPadding="false" />
 
     <Button
         android:id="@+id/btnAddAddress"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:background="@color/primary"
+        android:layout_height="48dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/bg_primary_pill"
         android:text="新增地址"
         android:textColor="@color/white" />
 </LinearLayout>

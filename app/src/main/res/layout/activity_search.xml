@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/light_gray">
 
     <!-- 搜索栏 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/bg_surface_card"
+        android:padding="12dp">
 
         <EditText
             android:id="@+id/etKeyword"
@@ -25,54 +29,65 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-            android:background="@color/primary"
+            android:background="@drawable/bg_primary_pill"
             android:text="搜索"
             android:textColor="@color/white" />
     </LinearLayout>
 
-    <!-- 排序按钮 -->
-    <LinearLayout
+    <!-- 排序 TabLayout -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tlOrder"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginTop="12dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btnOrderDefault"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="推荐"
-            style="@style/Widget.Material3.Button.TonalButton" />
-
-        <Button
-            android:id="@+id/btnOrderNew"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="按新品"
-            style="@style/Widget.Material3.Button.TonalButton" />
-
-        <Button
-            android:id="@+id/btnOrderPrice"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:text="按价格"
-            style="@style/Widget.Material3.Button.TonalButton" />
-    </LinearLayout>
+        android:background="@drawable/bg_surface_card"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorHeight="0dp"
+        app:tabRippleColor="@null"
+        app:tabSelectedTextColor="@color/white"
+        app:tabTextColor="@color/black" />
 
     <!-- 搜索结果 -->
-    <GridView
-        android:id="@+id/gvResult"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="12dp"
-        android:numColumns="2"
-        android:horizontalSpacing="8dp"
-        android:verticalSpacing="8dp" />
+        android:background="@drawable/bg_surface_card">
+
+        <ListView
+            android:id="@+id/lvResult"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/light_gray"
+            android:dividerHeight="1dp" />
+
+        <!-- 空状态提示 -->
+        <LinearLayout
+            android:id="@+id/llSearchEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="12dp"
+                android:src="@android:drawable/ic_menu_search"
+                android:tint="@color/primary"
+                android:background="@color/light_gray" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="搜索想要的商品"
+                android:textColor="@color/gray"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

@@ -1,14 +1,17 @@
 package com.example.newbeemall.model;
 
+import java.io.Serializable;
+
 /**
  * 商品数据模型
  */
-public class Goods {
+public class Goods implements Serializable {
     private long goodsId;
     private String goodsName;
     private double sellingPrice;
     private String goodsCoverImg;
     private String goodsIntro;
+    private int goodsCount = 1;
 
     // ====== Getter / Setter ======
     public long getGoodsId() { return goodsId; }
@@ -25,4 +28,7 @@ public class Goods {
 
     public String getGoodsIntro() { return goodsIntro; }
     public void setGoodsIntro(String goodsIntro) { this.goodsIntro = goodsIntro; }
+
+    public int getGoodsCount() { return goodsCount; }
+    public void setGoodsCount(int goodsCount) { this.goodsCount = goodsCount; }
 }

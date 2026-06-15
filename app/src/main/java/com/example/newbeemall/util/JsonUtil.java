@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class JsonUtil {
     private JsonUtil() {
@@ -39,6 +40,27 @@ public class JsonUtil {
         }
     }
 
+    /**
+     * 判断是否 token 失效（resultCode 为 416 或 401）
+     */
+    public static boolean isTokenExpired(String json) {
+        try {
+            JSONObject root = new JSONObject(json);
+            int code = root.optInt("resultCode");
+            return code == 416 || code == 401;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static String formatPrice(double value) {
+        long rounded = Math.round(value);
+        if (Math.abs(value - rounded) < 0.005d) {
+            return "¥" + rounded;
+        }
+        return "¥" + String.format(Locale.getDefault(), "%.2f", value);
+    }
+
     public static JSONArray dataArray(String json) throws Exception {
         JSONObject root = new JSONObject(json);
         JSONArray array = root.optJSONArray("data");
@@ -47,12 +69,22 @@ public class JsonUtil {
         if (data != null) {
             JSONArray list = data.optJSONArray("list");
             if (list != null) return list;
+            JSONArray cartItemList = data.optJSONArray("cartItemVOList");
+            if (cartItemList != null) return cartItemList;
             JSONArray cartItems = data.optJSONArray("cartItemVOS");
             if (cartItems != null) return cartItems;
+            JSONArray shopCartItemList = data.optJSONArray("shopCartItemVOList");
+            if (shopCartItemList != null) return shopCartItemList;
             JSONArray shopCartItems = data.optJSONArray("shopCartItemVOS");
             if (shopCartItems != null) return shopCartItems;
+            JSONArray settleItems = data.optJSONArray("newBeeMallShoppingCartItemVOS");
+            if (settleItems != null) return settleItems;
+            JSONArray orderItemVOS = data.optJSONArray("newBeeMallOrderItemVOS");
+            if (orderItemVOS != null) return orderItemVOS;
             JSONArray orderItems = data.optJSONArray("orderList");
             if (orderItems != null) return orderItems;
+            JSONArray orderItemList = data.optJSONArray("orderItemList");
+            if (orderItemList != null) return orderItemList;
         }
         return new JSONArray();
     }
@@ -76,7 +108,7 @@ public class JsonUtil {
         goods.setGoodsId(item.optLong("goodsId", item.optLong("goodsId")));
         goods.setGoodsName(item.optString("goodsName", item.optString("name")));
         goods.setSellingPrice(item.optDouble("sellingPrice", item.optDouble("price")));
-        goods.setGoodsCoverImg(item.optString("goodsCoverImg", item.optString("goodsCarousel")));
+        goods.setGoodsCoverImg(item.optString("goodsCoverImg", item.optString("goodsImg", item.optString("goodsCarousel"))));
         goods.setGoodsIntro(item.optString("goodsIntro", item.optString("goodsName")));
         return goods;
     }
@@ -120,12 +152,12 @@ public class JsonUtil {
             JSONObject item = array.optJSONObject(i);
             if (item == null) continue;
             CartItem cart = new CartItem();
-            cart.setCartItemId(item.optLong("cartItemId"));
+            cart.setCartItemId(item.optLong("cartItemId", item.optLong("cartItemVOId")));
             cart.setGoodsId(item.optLong("goodsId"));
-            cart.setGoodsName(item.optString("goodsName"));
-            cart.setGoodsCoverImg(item.optString("goodsCoverImg"));
+            cart.setGoodsName(item.optString("goodsName", item.optString("name")));
+            cart.setGoodsCoverImg(item.optString("goodsCoverImg", item.optString("goodsImg")));
             cart.setGoodsCount(item.optInt("goodsCount", 1));
-            cart.setSellingPrice(item.optDouble("sellingPrice"));
+            cart.setSellingPrice(item.optDouble("sellingPrice", item.optDouble("price")));
             result.add(cart);
         }
         return result;
@@ -166,6 +198,24 @@ public class JsonUtil {
             order.setTotalPrice(item.optDouble("totalPrice"));
             order.setOrderStatus(item.optInt("orderStatus"));
             order.setCreateTime(item.optString("createTime"));
+            // 解析订单商品列表
+            JSONArray orderItems = item.optJSONArray("newBeeMallOrderItemVOS");
+            if (orderItems == null) orderItems = item.optJSONArray("orderItemList");
+            if (orderItems != null) {
+                List<Goods> goodsList = new ArrayList<>();
+                for (int j = 0; j < orderItems.length(); j++) {
+                    JSONObject gi = orderItems.optJSONObject(j);
+                    if (gi == null) continue;
+                    Goods goods = new Goods();
+                    goods.setGoodsId(gi.optLong("goodsId"));
+                    goods.setGoodsName(gi.optString("goodsName"));
+                    goods.setGoodsCoverImg(gi.optString("goodsCoverImg"));
+                    goods.setSellingPrice(gi.optDouble("sellingPrice"));
+                    goods.setGoodsCount(gi.optInt("goodsCount", 1));
+                    goodsList.add(goods);
+                }
+                order.setGoodsList(goodsList);
+            }
             result.add(order);
         }
         return result;

@@ -1,10 +1,14 @@
 package com.example.newbeemall.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OrderItem {
     private String orderNo;
     private double totalPrice;
     private int orderStatus;
     private String createTime;
+    private List<Goods> goodsList = new ArrayList<>();
 
     public String getOrderNo() {
         return orderNo;
@@ -36,5 +40,13 @@ public class OrderItem {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public List<Goods> getGoodsList() {
+        return goodsList;
+    }
+
+    public void setGoodsList(List<Goods> goodsList) {
+        this.goodsList = goodsList;
     }
 }

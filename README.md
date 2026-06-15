@@ -27,16 +27,11 @@
 app/src/main/java/com/example/newbeemall/util/HttpUtil.java
 ```
 
-当前配置：
+当前支持在「账号管理」页切换校内 / 校外接口环境，默认使用校内服务器。
 
 ```java
-public static final String BASE_URL = "http://172.21.3.8:28019/mallapi";
-```
-
-如果使用备用实训服务器，可改为：
-
-```java
-public static final String BASE_URL = "http://172.30.130.131:28019/mallapi";
+public static final String DEFAULT_INTERNAL_BASE_URL = "http://172.21.3.8:28019/mallapi";
+public static final String DEFAULT_EXTERNAL_BASE_URL = "http://47.99.134.126:28019/mallapi";
 ```
 
 注意：实训文档要求同一套接口地址不要混用。

@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btnRegister);
 
         btnLogin.setOnClickListener(v -> login());
-        btnRegister.setOnClickListener(v -> register());
+        btnRegister.setOnClickListener(v -> showRegisterInfo());
     }
 
     /**
@@ -68,14 +68,17 @@ public class LoginActivity extends AppCompatActivity {
                     if (result != null) {
                         try {
                             JSONObject json = new JSONObject(result);
-                            if (json.optInt("resultCode") != 200) {
-                                Toast.makeText(this, json.optString("message", "登录失败"), Toast.LENGTH_SHORT).show();
+                            int resultCode = json.optInt("resultCode", -1);
+                            if (resultCode != 200) {
+                                // 服务器返回错误，显示具体原因
+                                String msg = json.optString("message", "登录失败");
+                                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             String token = json.optString("data");
                             if (token != null && !token.isEmpty()) {
-                                // 保存 token
                                 HttpUtil.saveToken(this, token);
+                                HttpUtil.savePhone(this, phone);
                                 Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, "Token: " + token);
                                 finish();
@@ -83,10 +86,11 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(this, "登录失败：token为空", Toast.LENGTH_SHORT).show();
                             }
                         } catch (Exception e) {
-                            Toast.makeText(this, "登录失败：" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            // 返回的不是 JSON，显示原始内容
+                            Toast.makeText(this, "登录失败：" + result.substring(0, Math.min(result.length(), 80)), Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(this, "登录失败，请检查网络", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "网络请求失败，请检查网络连接", Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {
@@ -99,42 +103,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * 注册逻辑
+     * 注册功能 - 按实训文档要求暂不实现，提示联系管理员
      */
     private void register() {
-        String phone = etPhone.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        showRegisterInfo();
+    }
 
-        if (phone.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "请输入手机号和密码", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (phone.length() != 11) {
-            Toast.makeText(this, "手机号必须是11位", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                JSONObject body = new JSONObject();
-                body.put("loginName", phone);
-                body.put("password", password);
-
-                String result = HttpUtil.post("/api/v1/user/register", body.toString(), this);
-
-                runOnUiThread(() -> {
-                    if (result != null && JsonUtil.isSuccess(result)) {
-                        Toast.makeText(this, "注册成功，请登录", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, result == null ? "注册失败，请检查网络" : JsonUtil.message(result), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Register error", e);
-                runOnUiThread(() ->
-                        Toast.makeText(this, "注册出错：" + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
-            }
-        }).start();
+    private void showRegisterInfo() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("注册说明")
+                .setMessage("实训版账号通常由老师或组长统一分配。\n\n示例账号：16666666666\n示例密码：88888888")
+                .setPositiveButton("知道了", null)
+                .show();
     }
 }

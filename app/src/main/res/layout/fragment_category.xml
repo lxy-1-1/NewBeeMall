@@ -2,23 +2,83 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="vertical"
+    android:background="@color/light_gray">
 
-    <!-- 左侧分类列表 -->
-    <ListView
-        android:id="@+id/lvCategory"
-        android:layout_width="120dp"
-        android:layout_height="match_parent"
-        android:background="@color/light_gray"
-        android:divider="@null" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp">
 
-    <!-- 右侧商品列表 -->
-    <GridView
-        android:id="@+id/gvCategoryGoods"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:tint="@color/black" />
+
+        <TextView
+            android:id="@+id/tvCategorySearch"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_edit_input"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:text="全场50元起步"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:numColumns="2"
-        android:padding="8dp" />
+        android:orientation="horizontal">
+
+        <ListView
+            android:id="@+id/lvCategory"
+            android:layout_width="112dp"
+            android:layout_height="match_parent"
+            android:background="@color/light_gray"
+            android:divider="@null" />
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvSelectedCategoryTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="家电"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.example.newbeemall.widget.ExpandedGridView
+                    android:id="@+id/gvCategoryGoods"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:numColumns="3"
+                    android:horizontalSpacing="4dp"
+                    android:verticalSpacing="8dp" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
 </LinearLayout>

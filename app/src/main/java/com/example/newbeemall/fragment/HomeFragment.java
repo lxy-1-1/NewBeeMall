@@ -2,27 +2,33 @@ package com.example.newbeemall.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.bumptech.glide.Glide;
 import com.example.newbeemall.AddressListActivity;
+import com.example.newbeemall.DetailActivity;
 import com.example.newbeemall.LoginActivity;
 import com.example.newbeemall.MainActivity;
 import com.example.newbeemall.OrderListActivity;
 import com.example.newbeemall.R;
 import com.example.newbeemall.SearchActivity;
 import com.example.newbeemall.adapter.GoodsGridAdapter;
+import com.example.newbeemall.adapter.NavAdapter;
 import com.example.newbeemall.model.Goods;
 import com.example.newbeemall.util.HttpUtil;
 import com.example.newbeemall.util.JsonUtil;
@@ -43,8 +49,29 @@ public class HomeFragment extends Fragment {
     private GoodsGridAdapter newAdapter;
     private GoodsGridAdapter hotAdapter;
     private GoodsGridAdapter recommendAdapter;
-    private ImageView ivBanner;
-    private TextView tvBannerTitle;
+
+    // 轮播图
+    private ViewPager2 vpBanner;
+    private LinearLayout llDots;
+    private final List<String> bannerUrls = new ArrayList<>();
+    private final List<Long> bannerGoodsIds = new ArrayList<>();
+    private final Handler autoScrollHandler = new Handler(Looper.getMainLooper());
+    private static final long AUTO_SCROLL_DELAY = 3000;
+
+    // 标题栏
+    private View toolbar;
+    private TextView tvToolbarTitle;
+
+    private final Runnable autoScrollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (vpBanner.getAdapter() != null && bannerUrls.size() > 1) {
+                int next = (vpBanner.getCurrentItem() + 1) % bannerUrls.size();
+                vpBanner.setCurrentItem(next, true);
+            }
+            autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
+        }
+    };
 
     @Nullable
     @Override
@@ -57,17 +84,39 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ivBanner = view.findViewById(R.id.ivBanner);
-        tvBannerTitle = view.findViewById(R.id.tvBannerTitle);
+
+        // 标题栏
+        toolbar = view.findViewById(R.id.toolbar);
+        tvToolbarTitle = view.findViewById(R.id.tvToolbarTitle);
+        TextView tvToolbarLogin = view.findViewById(R.id.tvToolbarLogin);
+        tvToolbarLogin.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), LoginActivity.class)));
+
+        // 轮播图
+        vpBanner = view.findViewById(R.id.vpBanner);
+        llDots = view.findViewById(R.id.llDots);
+
+        ScrollView scrollView = view.findViewById(R.id.scrollView);
+        scrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            int scrollY = scrollView.getScrollY();
+            // 将 200dp 转换为像素
+            float density = getResources().getDisplayMetrics().density;
+            int bannerHeightPx = (int) (200 * density);
+            float alpha = Math.min(1f, scrollY / (float) bannerHeightPx);
+            toolbar.setBackgroundColor(((int) (alpha * 255) << 24) | 0x001ABC9C);
+            tvToolbarTitle.setAlpha(alpha);
+        });
+
         TextView tvSearch = view.findViewById(R.id.tvSearch);
         GridView gvNav = view.findViewById(R.id.gvNav);
         GridView gvNewGoods = view.findViewById(R.id.gvNewGoods);
         GridView gvHotGoods = view.findViewById(R.id.gvHotGoods);
         GridView gvRecommendGoods = view.findViewById(R.id.gvRecommendGoods);
 
-        String[] navItems = {"分类", "搜索", "新品", "热门", "推荐", "购物车", "订单", "地址", "登录", "我的"};
-        gvNav.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, navItems));
-        gvNav.setOnItemClickListener((parent, itemView, position, id) -> handleNavClick(position));
+        // 导航使用自定义 NavAdapter（彩色圆形图标+文字标签）
+        gvNav.setAdapter(new NavAdapter(requireContext()));
+        gvNav.setOnItemClickListener((parent, itemView, position, id) -> {
+        });
 
         newAdapter = new GoodsGridAdapter(requireContext(), newGoods);
         hotAdapter = new GoodsGridAdapter(requireContext(), hotGoods);
@@ -78,6 +127,26 @@ public class HomeFragment extends Fragment {
 
         tvSearch.setOnClickListener(v -> startActivity(new Intent(requireContext(), SearchActivity.class)));
         loadHomeData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        startAutoScroll();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopAutoScroll();
+    }
+
+    private void startAutoScroll() {
+        autoScrollHandler.postDelayed(autoScrollRunnable, AUTO_SCROLL_DELAY);
+    }
+
+    private void stopAutoScroll() {
+        autoScrollHandler.removeCallbacks(autoScrollRunnable);
     }
 
     private void handleNavClick(int position) {
@@ -115,19 +184,21 @@ public class HomeFragment extends Fragment {
 
     private void loadHomeData() {
         new Thread(() -> {
+            // 先检测图片服务器（必须在后台线程执行）
+            HttpUtil.detectImageServer();
             String result = HttpUtil.get("/api/v1/index-infos", requireContext());
             if (getActivity() == null) return;
             getActivity().runOnUiThread(() -> {
-            if (result == null) {
-                Toast.makeText(requireContext(), "首页数据加载失败", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!JsonUtil.isSuccess(result)) {
-                Toast.makeText(requireContext(), JsonUtil.message(result), Toast.LENGTH_SHORT).show();
-                return;
-            }
-            parseHomeData(result);
-        });
+                if (result == null) {
+                    Toast.makeText(requireContext(), "首页数据加载失败", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!JsonUtil.isSuccess(result)) {
+                    Toast.makeText(requireContext(), JsonUtil.message(result), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                parseHomeData(result);
+            });
         }).start();
     }
 
@@ -152,19 +223,99 @@ public class HomeFragment extends Fragment {
 
     private void loadBanner(JSONArray carousels) {
         if (carousels == null || carousels.length() == 0) return;
-        JSONObject first = carousels.optJSONObject(0);
-        if (first == null) return;
-        String img = first.optString("carouselUrl", first.optString("goodsCoverImg"));
-        if ((img == null || img.isEmpty()) && !newGoods.isEmpty()) {
-            img = newGoods.get(0).getGoodsCoverImg();
+
+        bannerUrls.clear();
+        bannerGoodsIds.clear();
+        for (int i = 0; i < carousels.length(); i++) {
+            JSONObject item = carousels.optJSONObject(i);
+            if (item == null) continue;
+            String img = item.optString("carouselUrl", "");
+            if (img.isEmpty()) img = item.optString("goodsCoverImg", "");
+            long goodsId = item.optLong("goodsId", 0);
+            if (!img.isEmpty()) {
+                img = HttpUtil.buildImageUrl(img);
+                bannerUrls.add(img);
+                bannerGoodsIds.add(goodsId);
+            }
         }
-        if (img == null || img.isEmpty()) return;
-        String imgUrl = img.startsWith("http") ? img : HttpUtil.BASE_URL + img;
-        Glide.with(this)
-                .load(imgUrl)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .into(ivBanner);
-        tvBannerTitle.setBackgroundColor(0x00000000);
+
+        if (bannerUrls.isEmpty()) return;
+
+        // 设置 ViewPager2 适配器
+        vpBanner.setAdapter(new BannerAdapter(bannerUrls));
+
+        // 创建指示器圆点
+        llDots.removeAllViews();
+        for (int i = 0; i < bannerUrls.size(); i++) {
+            View dot = new View(requireContext());
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(16, 16);
+            params.setMargins(6, 0, 6, 0);
+            dot.setLayoutParams(params);
+            dot.setBackgroundResource(i == 0
+                    ? android.R.drawable.presence_online
+                    : android.R.drawable.presence_invisible);
+            llDots.addView(dot);
+        }
+
+        // 监听页面切换，更新指示器
+        vpBanner.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                for (int i = 0; i < llDots.getChildCount(); i++) {
+                    llDots.getChildAt(i).setBackgroundResource(
+                            i == position
+                                    ? android.R.drawable.presence_online
+                                    : android.R.drawable.presence_invisible);
+                }
+            }
+        });
+    }
+
+    /**
+     * 轮播图适配器
+     */
+    private class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.VH> {
+        private final List<String> urls;
+
+        BannerAdapter(List<String> urls) {
+            this.urls = urls;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_banner, parent, false);
+            return new VH(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            String url = urls.get(position);
+            HttpUtil.loadImage(holder.iv.getContext(), url, holder.iv);
+
+            // 点击轮播跳转到对应商品详情
+            holder.iv.setOnClickListener(v -> {
+                if (position < bannerGoodsIds.size() && bannerGoodsIds.get(position) > 0) {
+                    Intent intent = new Intent(requireContext(), DetailActivity.class);
+                    intent.putExtra("goodsId", bannerGoodsIds.get(position));
+                    startActivity(intent);
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return urls.size();
+        }
+
+        class VH extends RecyclerView.ViewHolder {
+            ImageView iv;
+
+            VH(@NonNull View itemView) {
+                super(itemView);
+                iv = itemView.findViewById(R.id.ivBanner);
+            }
+        }
     }
 }

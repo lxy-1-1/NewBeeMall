@@ -7,6 +7,7 @@ public class CartItem {
     private String goodsCoverImg;
     private int goodsCount;
     private double sellingPrice;
+    private boolean selected = true;
 
     public long getCartItemId() {
         return cartItemId;
@@ -58,5 +59,13 @@ public class CartItem {
 
     public double getTotalPrice() {
         return sellingPrice * goodsCount;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

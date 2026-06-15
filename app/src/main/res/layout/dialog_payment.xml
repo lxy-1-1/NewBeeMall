@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="18dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="24dp">
+
+        <ImageView
+            android:id="@+id/ivClosePay"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:tint="@color/gray" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/btnAliPay"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_payment_alipay"
+        android:text="支付宝支付"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnWechatPay"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_payment_wechat"
+        android:text="微信支付"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+</LinearLayout>

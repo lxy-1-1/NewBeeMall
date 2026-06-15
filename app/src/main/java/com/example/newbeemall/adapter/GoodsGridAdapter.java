@@ -9,11 +9,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.newbeemall.DetailActivity;
 import com.example.newbeemall.R;
 import com.example.newbeemall.model.Goods;
 import com.example.newbeemall.util.HttpUtil;
+import com.example.newbeemall.util.JsonUtil;
 
 import java.util.List;
 
@@ -63,20 +63,10 @@ public class GoodsGridAdapter extends BaseAdapter {
         Goods goods = goodsList.get(position);
 
         holder.tvName.setText(goods.getGoodsName());
-        holder.tvPrice.setText("¥" + goods.getSellingPrice());
+        holder.tvPrice.setText(JsonUtil.formatPrice(goods.getSellingPrice()));
 
         // 加载图片
-        String imgUrl = goods.getGoodsCoverImg();
-        if (imgUrl != null && !imgUrl.isEmpty()) {
-            if (!imgUrl.startsWith("http")) {
-                imgUrl = HttpUtil.BASE_URL + imgUrl;
-            }
-            Glide.with(context)
-                    .load(imgUrl)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
-                    .into(holder.ivCover);
-        }
+        HttpUtil.loadImage(context, goods.getGoodsCoverImg(), holder.ivCover);
 
         // 点击跳转详情
         convertView.setOnClickListener(v -> {

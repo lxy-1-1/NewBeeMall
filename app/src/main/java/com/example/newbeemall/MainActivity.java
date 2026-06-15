@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private final String[] tabTitles = {"首页", "分类", "购物车", "我的"};
+    private final int[] tabIcons = {R.drawable.ic_tab_home, R.drawable.ic_tab_category, R.drawable.ic_tab_cart, R.drawable.ic_tab_my};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         // 绑定 TabLayout 和 ViewPager
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             tab.setText(tabTitles[position]);
+            tab.setIcon(tabIcons[position]);
         }).attach();
 
         int tabIndex = getIntent().getIntExtra("tabIndex", 0);
