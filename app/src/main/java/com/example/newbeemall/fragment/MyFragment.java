@@ -113,7 +113,7 @@ public class MyFragment extends Fragment {
                         "小组成员及分工：\n\n" +
                         "杨富鈞：首页、地址管理\n" +
                         "白奥涵：购物车、生成订单\n" +
-                        "马浩：我的订单、商品搜索、账号管理\n" +
+                        "马浩：我的订单、商品搜索、账号管理、我的\n" +
                         "刘晨阳：分类、商品详情\n\n" +
                         "项目：新蜂商城 Android 实训")
                 .setPositiveButton("确定", null)

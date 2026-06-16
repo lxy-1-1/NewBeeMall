@@ -132,9 +132,6 @@ public class DetailActivity extends AppCompatActivity {
                         if (imageUrls.isEmpty() && !goods.getGoodsCoverImg().isEmpty()) {
                             imageUrls.add(HttpUtil.buildImageUrl(goods.getGoodsCoverImg()));
                         }
-                        while (imageUrls.size() < 3 && !imageUrls.isEmpty()) {
-                            imageUrls.add(imageUrls.get(0));
-                        }
                         setupImageCarousel();
 
                     } catch (Exception e) {

@@ -32,6 +32,7 @@ import com.example.newbeemall.adapter.NavAdapter;
 import com.example.newbeemall.model.Goods;
 import com.example.newbeemall.util.HttpUtil;
 import com.example.newbeemall.util.JsonUtil;
+import com.example.newbeemall.widget.BannerContainer;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,6 +58,13 @@ public class HomeFragment extends Fragment {
     private final List<Long> bannerGoodsIds = new ArrayList<>();
     private final Handler autoScrollHandler = new Handler(Looper.getMainLooper());
     private static final long AUTO_SCROLL_DELAY = 3000;
+    private static final long RESUME_SCROLL_DELAY = 5000; // 手滑后恢复自动轮播的延迟
+    private boolean isUserDragging = false; // 用户是否正在手动滑动
+    private final int[] fallbackBanners = {
+            R.drawable.banner_home_1,
+            R.drawable.banner_home_2,
+            R.drawable.banner_home_3
+    };
 
     // 标题栏
     private View toolbar;
@@ -95,6 +103,13 @@ public class HomeFragment extends Fragment {
         // 轮播图
         vpBanner = view.findViewById(R.id.vpBanner);
         llDots = view.findViewById(R.id.llDots);
+
+        // 设置 BannerContainer 的主 ViewPager2 引用，让它能在 dispatchTouchEvent 阶段
+        // 禁用主 tab ViewPager2 的滑动，解决嵌套 ViewPager2 的手滑冲突
+        BannerContainer bannerContainer = view.findViewById(R.id.bannerContainer);
+        if (getActivity() instanceof MainActivity) {
+            bannerContainer.setMainViewPager(((MainActivity) getActivity()).getViewPager());
+        }
 
         ScrollView scrollView = view.findViewById(R.id.scrollView);
         scrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
@@ -222,20 +237,29 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadBanner(JSONArray carousels) {
-        if (carousels == null || carousels.length() == 0) return;
-
         bannerUrls.clear();
         bannerGoodsIds.clear();
-        for (int i = 0; i < carousels.length(); i++) {
-            JSONObject item = carousels.optJSONObject(i);
-            if (item == null) continue;
-            String img = item.optString("carouselUrl", "");
-            if (img.isEmpty()) img = item.optString("goodsCoverImg", "");
-            long goodsId = item.optLong("goodsId", 0);
-            if (!img.isEmpty()) {
-                img = HttpUtil.buildImageUrl(img);
-                bannerUrls.add(img);
-                bannerGoodsIds.add(goodsId);
+        if (carousels != null) {
+            for (int i = 0; i < carousels.length(); i++) {
+                JSONObject item = carousels.optJSONObject(i);
+                if (item == null) continue;
+                String img = item.optString("carouselUrl", "");
+                if (img.isEmpty()) img = item.optString("goodsCoverImg", "");
+                long goodsId = item.optLong("goodsId", 0);
+                if (!img.isEmpty()) {
+                    img = HttpUtil.buildImageUrl(img);
+                    bannerUrls.add(img);
+                    bannerGoodsIds.add(goodsId);
+                }
+            }
+        }
+
+        if (bannerUrls.size() < 3) {
+            bannerUrls.clear();
+            bannerGoodsIds.clear();
+            for (int i = 0; i < fallbackBanners.length; i++) {
+                bannerUrls.add("android.resource://" + requireContext().getPackageName() + "/" + fallbackBanners[i]);
+                bannerGoodsIds.add(0L);
             }
         }
 
@@ -257,7 +281,7 @@ public class HomeFragment extends Fragment {
             llDots.addView(dot);
         }
 
-        // 监听页面切换，更新指示器
+        // 监听页面切换和滑动状态，更新指示器 + 手滑暂停/恢复自动轮播
         vpBanner.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -266,6 +290,21 @@ public class HomeFragment extends Fragment {
                             i == position
                                     ? android.R.drawable.presence_online
                                     : android.R.drawable.presence_invisible);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                    // 用户手动滑动时暂停自动轮播
+                    isUserDragging = true;
+                    stopAutoScroll();
+                } else if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                    if (isUserDragging) {
+                        // 用户松手后，延迟恢复自动轮播
+                        isUserDragging = false;
+                        autoScrollHandler.postDelayed(autoScrollRunnable, RESUME_SCROLL_DELAY);
+                    }
                 }
             }
         });
@@ -292,7 +331,16 @@ public class HomeFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
             String url = urls.get(position);
-            HttpUtil.loadImage(holder.iv.getContext(), url, holder.iv);
+            if (url.startsWith("android.resource://")) {
+                try {
+                    int resId = Integer.parseInt(url.substring(url.lastIndexOf('/') + 1));
+                    holder.iv.setImageResource(resId);
+                } catch (Exception e) {
+                    HttpUtil.loadImage(holder.iv.getContext(), url, holder.iv);
+                }
+            } else {
+                HttpUtil.loadImage(holder.iv.getContext(), url, holder.iv);
+            }
 
             // 点击轮播跳转到对应商品详情
             holder.iv.setOnClickListener(v -> {

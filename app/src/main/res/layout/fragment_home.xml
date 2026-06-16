@@ -16,8 +16,8 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- 轮播图区域 -->
-            <FrameLayout
+            <!-- 轮播图区域（使用自定义 BannerContainer 解决嵌套 ViewPager2 手滑冲突） -->
+            <com.example.newbeemall.widget.BannerContainer
                 android:id="@+id/bannerContainer"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
@@ -50,7 +50,7 @@
                     android:text="山河无恙，人间皆安"
                     android:textColor="@color/gray"
                     android:textSize="14sp" />
-            </FrameLayout>
+            </com.example.newbeemall.widget.BannerContainer>
 
             <!-- 导航区域（GridView） -->
             <com.example.newbeemall.widget.ExpandedGridView

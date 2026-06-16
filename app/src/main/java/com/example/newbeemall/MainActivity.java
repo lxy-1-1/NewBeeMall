@@ -57,4 +57,8 @@ public class MainActivity extends AppCompatActivity {
             viewPager.setCurrentItem(index, false);
         }
     }
+
+    public ViewPager2 getViewPager() {
+        return viewPager;
+    }
 }
