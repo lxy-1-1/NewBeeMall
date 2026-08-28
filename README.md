@@ -1,53 +1,49 @@
 # NewBeeMall
 
-新蜂商城 Android 客户端实训项目。
+新蜂商城 Android 实训项目，基于 Android 原生 Java 开发。
 
-## 项目说明
+## 项目特点
 
-本项目基于 Android 原生 Java 开发，实现新蜂商城移动端主要功能页面，网络访问使用 `HttpURLConnection`，符合实训文档要求。
+- 原生 Android + Java
+- 网络请求使用 `HttpURLConnection`
+- 支持登录、分类、购物车、订单、地址管理、商品搜索
+- 已按实训参考图重做主要页面 UI
 
-## 已实现功能
+## 功能说明
 
-- 登录 / 注册
-- 首页：轮播图、导航、新品上线、热门商品、最新推荐
-- 分类：左侧分类、右侧子分类入口
-- 商品搜索：推荐、新品、价格排序
-- 商品详情：详情展示、加入购物车
-- 购物车：列表、合计、删除、结算
+- 首页：顶部轮播、导航入口、新品、热门、推荐
+- 分类：左侧分类列表、右侧分类内容
+- 搜索：商品搜索与列表展示
+- 商品详情：图片展示、加入购物车、立即购买
+- 购物车：勾选、数量修改、删除、结算
+- 生成订单：地址选择、支付方式、支付流程
+- 订单列表：按状态查看订单
 - 地址管理：新增、编辑、默认地址
-- 生成订单：选择支付方式、模拟支付
-- 我的订单：按订单状态筛选
-- 我的：小组信息和功能入口
+- 我的：个人信息、账号管理、地址管理、关于我们
+
+## 运行说明
+
+1. 使用 Android Studio 打开项目根目录 `NewBeeMall`
+2. 等待 Gradle 同步完成
+3. 运行 `app` 模块
 
 ## 接口配置
 
-接口根地址位于：
+接口地址配置在：
 
 ```text
 app/src/main/java/com/example/newbeemall/util/HttpUtil.java
 ```
 
-当前支持在「账号管理」页切换校内 / 校外接口环境，默认使用校内服务器。
+当前支持在「账号管理」页面切换校内 / 校外接口环境。
 
-```java
-public static final String DEFAULT_INTERNAL_BASE_URL = "http://172.21.3.8:28019/mallapi";
-public static final String DEFAULT_EXTERNAL_BASE_URL = "http://47.99.134.126:28019/mallapi";
-```
+## 目录说明
 
-注意：实训文档要求同一套接口地址不要混用。
+- `app/src/main/java`：业务代码
+- `app/src/main/res/layout`：页面布局
+- `app/src/main/res/drawable`：页面样式与图形资源
+- `app/src/main/res/mipmap`：应用图标资源
 
-## 构建方式
+## 备注
 
-使用 Android Studio 打开项目根目录：
-
-```text
-NewBeeMall
-```
-
-同步 Gradle 后运行 `app` 模块即可。
-
-Debug APK 输出路径：
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
+该项目主要用于 Android 实训展示，重点在页面还原、基础交互和接口对接。
